@@ -58,7 +58,6 @@ def init_db():
 
 @app.route('/api/sobreaviso-atual', methods=['GET'])
 def get_sobreaviso_atual():
-    # (Código desta função não mudou)
     try:
         db = get_db()
         config = db.execute("SELECT data_inicio_ciclo FROM Configuracao WHERE id = 1").fetchone()
@@ -85,7 +84,6 @@ def get_sobreaviso_atual():
 
 @app.route('/api/participantes', methods=['GET'])
 def get_participantes():
-    # (Código desta função não mudou)
     db = get_db()
     participantes_raw = db.execute("SELECT * FROM Participantes ORDER BY ordem_rotacao ASC").fetchall()
     participantes = [dict(row) for row in participantes_raw]
@@ -93,7 +91,6 @@ def get_participantes():
 
 @app.route('/api/participantes', methods=['POST'])
 def add_participante():
-    # (Código desta função não mudou)
     dados = request.get_json()
     if not dados or 'nome' not in dados:
         return jsonify({"erro": "Dados incompletos. 'nome' é obrigatório."}), 400
@@ -119,7 +116,6 @@ def add_participante():
 
 @app.route('/api/participantes/<int:id>', methods=['PUT'])
 def update_participante(id):
-    # (Código desta função não mudou)
     dados = request.get_json()
     if not dados or 'nome' not in dados or 'ordem_rotacao' not in dados:
         return jsonify({"erro": "Dados incompletos."}), 400
@@ -137,7 +133,6 @@ def update_participante(id):
 
 @app.route('/api/participantes/<int:id>', methods=['DELETE'])
 def delete_participante(id):
-    # (Código desta função não mudou)
     try:
         db = get_db()
         db.execute("DELETE FROM Participantes WHERE id = ?", (id,))
@@ -216,4 +211,4 @@ if __name__ == '__main__':
             """)
         init_db()
         
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=True)

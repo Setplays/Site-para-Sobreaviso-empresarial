@@ -79,7 +79,6 @@
         .container {
             display: none; 
             
-            /* MUDANÇA: Fundo semi-transparente para ver a imagem */
             background-color: rgba(255, 255, 255, 0.95); 
             
             border-radius: 10px;
@@ -227,8 +226,6 @@
     </div>
 
     <script>
-        // O JavaScript é IDÊNTICO ao anterior.
-        // Vou usar a versão dinâmica que fizemos para o IP.
         const API_BASE_URL = 'http://' + window.location.hostname + ':5000';
         let sortable = null;
 
@@ -255,12 +252,10 @@
             }
         });
         
-        // (O resto do seu JavaScript fica aqui, idêntico ao anterior:
         // add-form listener, edit-form listener, cancel-btn listener,
         // carregarParticipantes(), onDragEnd(), logarAcessoAdmin(),
         // carregarLogs(), mostrarFormularioEdicao(), deletarParticipante() ... )
 
-        // Copiando o resto do JS do arquivo anterior:
         document.getElementById('add-form').addEventListener('submit', async (event) => {
             event.preventDefault(); 
             const nome = document.getElementById('novo-nome').value;

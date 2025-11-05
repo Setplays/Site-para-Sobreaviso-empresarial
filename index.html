@@ -17,25 +17,19 @@
             
             /* --- MUDANÇAS DA IMAGEM DE FUNDO --- */
             
-            /* 1. Substitua 'background.jpg' pelo nome da sua imagem */
             background-image: url('Fundo_01-02.jpg'); 
             
-            /* 2. Garante que a imagem cubra a tela inteira */
             background-size: cover; 
             
-            /* 3. Centraliza a imagem */
             background-position: center; 
             
-            /* 4. (Opcional) Faz o fundo ficar fixo enquanto o conteúdo rola */
             background-attachment: fixed; 
             
             /* --- FIM DAS MUDANÇAS --- */
         }
         
         .container {
-            /* * MUDANÇA: Adiciona um fundo branco semi-transparente 
-             * para que o texto fique legível em cima da foto.
-            */
+
             background-color: rgba(255, 255, 255, 0.95); /* 95% opaco */
             
             border-radius: 10px;
@@ -95,8 +89,7 @@
     </div>
 
     <script>
-        // O JavaScript não precisa de nenhuma mudança
-        // (Vou usar a versão dinâmica que fizemos para o IP)
+
         const API_BASE_URL = 'http://' + window.location.hostname + ':5000';
 
         window.addEventListener('load', () => {
