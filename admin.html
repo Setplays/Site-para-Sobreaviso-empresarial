@@ -2,10 +2,13 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale-1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Controle de Sobreaviso</title>
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    
     <style>
+        /* --- ESTILOS GERAIS --- */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #f4f7f6;
@@ -14,62 +17,91 @@
             justify-content: center;
             padding-top: 40px;
             padding-bottom: 40px;
-        }
-        .container {
-            background-color: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            padding: 40px;
-            width: 90%;
-            max-width: 700px;
-        }
-        h1, h2 {
-            color: #2c3e50;
-            text-align: center;
-        }
-        a {
-            color: #007bff;
-            display: block;
-            text-align: center;
-            margin-bottom: 20px;
-        }
+            margin: 0;
 
-        /* Tabela */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
-        }
-        th {
-            background-color: #f9f9f9;
-        }
-        tr:nth-child(even) {
-            background-color: #fdfdfd;
+            /* --- MUDANÇAS DA IMAGEM DE FUNDO --- */
+            
+            /* 1. Substitua 'admin-background.jpg' pelo nome da sua imagem */
+            background-image: url('Fundo_01-02.jpg'); 
+            
+            background-size: cover; 
+            background-position: center; 
+            background-attachment: fixed; 
+            
+            /* --- FIM DAS MUDANÇAS --- */
         }
         
-        /* Formulários */
-        form {
-            padding: 20px;
-            background-color: #f9f9f9;
-            border-radius: 8px;
-            border: 1px solid #eee;
-            margin-top: 20px;
-        }
-        form div {
-            margin-bottom: 15px;
+        /* --- ESTILOS DO MODAL DE LOGIN --- */
+        #login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Fundo escuro */
             display: flex;
-            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
         }
-        form label {
+        
+        #login-modal {
+            background-color: #ffffff;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        
+        #login-modal h2 { margin-top: 0; }
+        
+        #login-modal input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        
+        #login-modal button { width: 100%; }
+
+        #login-error {
+            color: #d9534f;
+            margin-top: 15px;
             font-weight: bold;
-            margin-bottom: 5px;
-            width: 100px;
+            display: none;
         }
+        /* --- FIM DO MODAL DE LOGIN --- */
+
+        .container {
+            display: none; 
+            
+            /* MUDANÇA: Fundo semi-transparente para ver a imagem */
+            background-color: rgba(255, 255, 255, 0.95); 
+            
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            width: 90%;
+            max-width: 800px; 
+        }
+        
+        h1, h2 { color: #2c3e50; text-align: center; }
+        a { color: #007bff; display: block; text-align: center; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f9f9f9; }
+        tr:nth-child(even) { background-color: #fdfdfd; }
+        
+        #lista-participantes tr { cursor: move; }
+        .sortable-ghost { opacity: 0.4; background-color: #e3f2fd; }
+        
+        form { padding: 20px; background-color: #f9f9f9; border-radius: 8px; border: 1px solid #eee; margin-top: 20px; }
+        form div { margin-bottom: 15px; display: flex; flex-wrap: wrap; }
+        form label { font-weight: bold; margin-bottom: 5px; width: 100px; }
         form input[type="text"],
         form input[type="number"] {
             flex: 1;
@@ -78,8 +110,6 @@
             border-radius: 5px;
             min-width: 150px;
         }
-        
-        /* Botões */
         button, .button {
             background-color: #007bff;
             color: white;
@@ -90,56 +120,59 @@
             font-weight: bold;
             margin: 5px;
         }
-        button:hover {
-            background-color: #0056b3;
-        }
-        button.edit-btn {
-            background-color: #ffc107;
-        }
-        button.edit-btn:hover {
-            background-color: #e0a800;
-        }
-        button.delete-btn {
-            background-color: #d9534f;
-        }
-        button.delete-btn:hover {
-            background-color: #c9302c;
-        }
-        button.cancel-btn {
-            background-color: #777;
-        }
-        button.cancel-btn:hover {
-            background-color: #555;
-        }
+        button:hover { background-color: #0056b3; }
+        button.edit-btn { background-color: #ffc107; cursor: pointer; }
+        button.edit-btn:hover { background-color: #e0a800; }
+        button.delete-btn { background-color: #d9534f; cursor: pointer; }
+        button.delete-btn:hover { background-color: #c9302c; }
+        button.cancel-btn { background-color: #777; }
+        button.cancel-btn:hover { background-color: #555; }
+        #edit-form-container { display: none; margin-top: 30px; border-top: 2px dashed #007bff; padding-top: 20px; }
         
-        /* Seção de Edição (escondida por padrão) */
-        #edit-form-container {
-            display: none;
-            margin-top: 30px;
-            border-top: 2px dashed #007bff;
+        #log-section {
+            margin-top: 40px;
+            border-top: 2px solid #eee;
             padding-top: 20px;
         }
-
+        #log-section table {
+            font-size: 0.9rem;
+            max-height: 300px;
+            display: block;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
 
+    <div id="login-overlay">
+        <div id="login-modal">
+            <h2>Acesso Restrito</h2>
+            <p>Digite a senha para continuar.</p>
+            <form id="login-form">
+                <input type="password" id="admin-password" placeholder="Senha">
+                <button type="submit">Entrar</button>
+                <div id="login-error">Senha incorreta.</div>
+            </form>
+        </div>
+    </div>
+    
     <div class="container">
         <h1>Gerenciamento</h1>
         <a href="index.html">Ver Sobreaviso Atual</a>
 
         <section id="lista-section">
-            <h2>Participantes Atuais</h2>
+            <h2>Participantes Atuais (Arraste para reordenar)</h2>
             <table>
                 <thead>
                     <tr>
                         <th>Nome</th>
+                        <th>Telefone</th>
                         <th>Ordem</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody id="lista-participantes">
-                    <tr><td colspan="3">Carregando...</td></tr>
+                    <tr><td colspan="4">Carregando...</td></tr>
                 </tbody>
             </table>
         </section>
@@ -152,8 +185,8 @@
                     <input type="text" id="novo-nome" placeholder="Nome completo" required>
                 </div>
                 <div>
-                    <label for="nova-ordem">Ordem:</label>
-                    <input type="number" id="nova-ordem" placeholder="Ex: 1, 2, 3..." required>
+                    <label for="novo-telefone">Telefone:</label>
+                    <input type="text" id="novo-telefone" placeholder="(XX) XXXXX-XXXX">
                 </div>
                 <button type="submit">Adicionar Participante</button>
             </form>
@@ -163,212 +196,181 @@
             <h2>Editar Participante</h2>
             <form id="edit-form">
                 <input type="hidden" id="edit-id">
+                <input type="hidden" id="edit-ordem-hidden"> 
                 <div>
                     <label for="edit-nome">Nome:</label>
                     <input type="text" id="edit-nome" required>
                 </div>
                 <div>
-                    <label for="edit-ordem">Ordem:</label>
-                    <input type="number" id="edit-ordem" required>
+                    <label for="edit-telefone">Telefone:</label>
+                    <input type="text" id="edit-telefone">
                 </div>
                 <button type="submit">Salvar Alterações</button>
-                <button type="button" id="cancel-edit-btn" class="cancel-btn">Cancelar</button>
+                <button type="button" id="cancel-btn" class="cancel-btn">Cancelar</button>
             </form>
         </section>
-
+        
+        <section id="log-section">
+            <h2>Histórico de Acessos (Últimos 20)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Endereço IP</th>
+                        <th>Data e Hora</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-logs">
+                    <tr><td colspan="2">Carregando logs...</td></tr>
+                </tbody>
+            </table>
+        </section>
     </div>
 
     <script>
-        const API_BASE_URL = 'http://127.0.0.1:5000'; // O endereço do seu backend
+        // O JavaScript é IDÊNTICO ao anterior.
+        // Vou usar a versão dinâmica que fizemos para o IP.
+        const API_BASE_URL = 'http://' + window.location.hostname + ':5000';
+        let sortable = null;
 
-        // --- Event Listeners (Pontos de Partida) ---
+        /* --- LÓGICA DE LOGIN --- */
+        document.getElementById('login-form').addEventListener('submit', (event) => {
+            event.preventDefault(); 
+            
+            const senhaDigitada = document.getElementById('admin-password').value;
+            const container = document.querySelector('.container');
+            const loginOverlay = document.getElementById('login-overlay');
+            const loginError = document.getElementById('login-error');
 
-        // 1. Quando a página carregar, busca a lista de participantes
-        window.addEventListener('load', () => {
-            carregarParticipantes();
+            if (senhaDigitada === "languard") {
+                loginOverlay.style.display = 'none'; 
+                container.style.display = 'block';   
+                
+                logarAcessoAdmin();
+                carregarParticipantes();
+                carregarLogs();
+                
+            } else {
+                loginError.style.display = 'block'; 
+                document.getElementById('admin-password').value = ''; 
+            }
         });
+        
+        // (O resto do seu JavaScript fica aqui, idêntico ao anterior:
+        // add-form listener, edit-form listener, cancel-btn listener,
+        // carregarParticipantes(), onDragEnd(), logarAcessoAdmin(),
+        // carregarLogs(), mostrarFormularioEdicao(), deletarParticipante() ... )
 
-        // 2. Quando o formulário de "Adicionar" for enviado
+        // Copiando o resto do JS do arquivo anterior:
         document.getElementById('add-form').addEventListener('submit', async (event) => {
-            event.preventDefault(); // Impede o recarregamento da página
-
+            event.preventDefault(); 
             const nome = document.getElementById('novo-nome').value;
-            const ordem = document.getElementById('nova-ordem').value;
-
+            const telefone = document.getElementById('novo-telefone').value;
             try {
                 const response = await fetch(`${API_BASE_URL}/api/participantes`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        nome: nome,
-                        ordem_rotacao: parseInt(ordem)
-                    })
+                    body: JSON.stringify({ nome: nome, telefone: telefone })
                 });
-
-                if (!response.ok) {
-                    throw new Error('Falha ao adicionar participante.');
-                }
-                
-                // Limpa o formulário e recarrega a lista
+                if (!response.ok) throw new Error('Falha ao adicionar participante.');
                 document.getElementById('novo-nome').value = '';
-                document.getElementById('nova-ordem').value = '';
+                document.getElementById('novo-telefone').value = '';
                 await carregarParticipantes();
-
-            } catch (error) {
-                console.error(error);
-                alert('Erro ao adicionar participante.');
-            }
+            } catch (error) { console.error(error); alert('Erro ao adicionar participante.'); }
         });
-
-        // 3. Quando o formulário de "Editar" for enviado
         document.getElementById('edit-form').addEventListener('submit', async (event) => {
             event.preventDefault();
-            
             const id = document.getElementById('edit-id').value;
             const nome = document.getElementById('edit-nome').value;
-            const ordem = document.getElementById('edit-ordem').value;
-            
+            const ordem = document.getElementById('edit-ordem-hidden').value;
+            const telefone = document.getElementById('edit-telefone').value;
             try {
                 const response = await fetch(`${API_BASE_URL}/api/participantes/${id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        nome: nome,
-                        ordem_rotacao: parseInt(ordem)
-                    })
+                    body: JSON.stringify({ nome: nome, ordem_rotacao: parseInt(ordem), telefone: telefone })
                 });
-
-                if (!response.ok) {
-                    throw new Error('Falha ao atualizar participante.');
-                }
-
-                // Esconde o formulário de edição e recarrega a lista
+                if (!response.ok) throw new Error('Falha ao atualizar participante.');
                 document.getElementById('edit-form-container').style.display = 'none';
                 await carregarParticipantes();
-
-            } catch (error) {
-                console.error(error);
-                alert('Erro ao atualizar participante.');
-            }
+            } catch (error) { console.error(error); alert('Erro ao atualizar participante.'); }
         });
-
-        // 4. Quando o botão "Cancelar" da edição for clicado
-        document.getElementById('cancel-edit-btn').addEventListener('click', () => {
+        document.getElementById('cancel-btn').addEventListener('click', () => {
             document.getElementById('edit-form-container').style.display = 'none';
         });
-
-        
-        // --- Funções Auxiliares ---
-
-        /**
-         * Busca a lista de participantes da API e preenche a tabela.
-         */
         async function carregarParticipantes() {
             const tbody = document.getElementById('lista-participantes');
-            tbody.innerHTML = '<tr><td colspan="3">Carregando...</td></tr>'; // Limpa a lista antiga
-
+            tbody.innerHTML = '<tr><td colspan="4">Carregando...</td></tr>'; 
             try {
                 const response = await fetch(`${API_BASE_URL}/api/participantes`);
-                if (!response.ok) {
-                    throw new Error('Não foi possível carregar a lista.');
-                }
-                
+                if (!response.ok) throw new Error('Não foi possível carregar a lista.');
                 const participantes = await response.json();
-                
-                // Limpa o "Carregando..."
                 tbody.innerHTML = '';
-
                 if (participantes.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="3">Nenhum participante cadastrado.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="4">Nenhum participante cadastrado.</td></tr>';
                     return;
                 }
-
-                // Cria uma linha <tr> para cada participante
                 participantes.forEach(p => {
                     const tr = document.createElement('tr');
-                    
-                    // Coluna Nome
-                    const tdNome = document.createElement('td');
-                    tdNome.textContent = p.nome;
-                    
-                    // Coluna Ordem
-                    const tdOrdem = document.createElement('td');
-                    tdOrdem.textContent = p.ordem_rotacao;
-                    
-                    // Coluna Ações (Botões)
-                    const tdAcoes = document.createElement('td');
-                    
-                    // Botão Editar
-                    const editButton = document.createElement('button');
-                    editButton.textContent = 'Editar';
-                    editButton.className = 'edit-btn';
-                    editButton.onclick = () => mostrarFormularioEdicao(p.id, p.nome, p.ordem_rotacao);
-                    
-                    // Botão Deletar
-                    const deleteButton = document.createElement('button');
-                    deleteButton.textContent = 'Remover';
-                    deleteButton.className = 'delete-btn';
-                    deleteButton.onclick = () => deletarParticipante(p.id);
-
-                    tdAcoes.appendChild(editButton);
-                    tdAcoes.appendChild(deleteButton);
-                    
-                    tr.appendChild(tdNome);
-                    tr.appendChild(tdOrdem);
-                    tr.appendChild(tdAcoes);
-                    
+                    tr.dataset.id = p.id; tr.dataset.name = p.nome; tr.dataset.order = p.ordem_rotacao; tr.dataset.phone = p.telefone || ''; 
+                    tr.innerHTML = `<td>${p.nome}</td><td>${p.telefone || 'N/A'}</td><td>${p.ordem_rotacao}</td><td><button class="edit-btn">Editar</button><button class="delete-btn">Remover</button></td>`;
+                    tr.querySelector('.edit-btn').addEventListener('click', () => mostrarFormularioEdicao(p.id, p.nome, p.ordem_rotacao, p.telefone));
+                    tr.querySelector('.delete-btn').addEventListener('click', () => deletarParticipante(p.id));
                     tbody.appendChild(tr);
                 });
-
-            } catch (error) {
-                console.error(error);
-                tbody.innerHTML = `<tr><td colspan="3" class="erro">${error.message}</td></tr>`;
-            }
+                if (sortable) sortable.destroy();
+                sortable = new Sortable(tbody, { animation: 150, ghostClass: 'sortable-ghost', onEnd: onDragEnd });
+            } catch (error) { console.error(error); tbody.innerHTML = `<tr><td colspan="4" class="erro">${error.message}</td></tr>`; }
         }
-
-        /**
-         * Mostra a seção de edição e preenche com os dados do participante.
-         */
-        function mostrarFormularioEdicao(id, nome, ordem) {
+        async function onDragEnd() {
+            const rows = document.getElementById('lista-participantes').querySelectorAll('tr');
+            const updatePromises = []; 
+            rows.forEach((row, index) => {
+                const id = row.dataset.id; const nome = row.dataset.name; const novaOrdem = index + 1; const telefone = row.dataset.phone; 
+                const promise = fetch(`${API_BASE_URL}/api/participantes/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome: nome, ordem_rotacao: novaOrdem, telefone: telefone })
+                });
+                updatePromises.push(promise);
+            });
+            try { await Promise.all(updatePromises); await carregarParticipantes(); }
+            catch (error) { console.error("Erro ao salvar a nova ordem:", error); alert("Ocorreu um erro ao salvar a nova ordem. Recarregando a lista..."); await carregarParticipantes(); }
+        }
+        async function logarAcessoAdmin() {
+            try { await fetch(`${API_BASE_URL}/api/admin-log`, { method: 'POST' }); console.log("Log de acesso registrado."); }
+            catch (error) { console.error("Falha ao registrar log de acesso:", error); }
+        }
+        async function carregarLogs() {
+            const tbody = document.getElementById('lista-logs');
+            tbody.innerHTML = '<tr><td colspan="2">Carregando logs...</td></tr>';
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin-log`);
+                if (!response.ok) throw new Error('Não foi possível carregar os logs.');
+                const logs = await response.json();
+                tbody.innerHTML = ''; 
+                if (logs.length === 0) { tbody.innerHTML = '<tr><td colspan="2">Nenhum acesso registrado.</td></tr>'; return; }
+                logs.forEach(log => {
+                    const tr = document.createElement('tr');
+                    const dataFormatada = new Date(log.timestamp).toLocaleString('pt-BR');
+                    tr.innerHTML = `<td>${log.ip_address}</td><td>${dataFormatada}</td>`;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) { console.error(error); tbody.innerHTML = `<tr><td colspan="2" class="erro">${error.message}</td></tr>`; }
+        }
+        function mostrarFormularioEdicao(id, nome, ordem, telefone) {
             document.getElementById('edit-form-container').style.display = 'block';
-            
-            // Preenche os campos do formulário
-            document.getElementById('edit-id').value = id;
-            document.getElementById('edit-nome').value = nome;
-            document.getElementById('edit-ordem').value = ordem;
-            
-            // Rola a página até o formulário de edição
+            document.getElementById('edit-id').value = id; document.getElementById('edit-nome').value = nome;
+            document.getElementById('edit-ordem-hidden').value = ordem; document.getElementById('edit-telefone').value = telefone || '';
             document.getElementById('edit-form-container').scrollIntoView({ behavior: 'smooth' });
         }
-
-        /**
-         * Deleta um participante pelo ID.
-         */
         async function deletarParticipante(id) {
-            // Pede confirmação
-            if (!confirm('Tem certeza que deseja remover este participante? \nEsta ação não pode ser desfeita.')) {
-                return;
-            }
-
+            if (!confirm('Tem certeza que deseja remover este participante?')) return;
             try {
-                const response = await fetch(`${API_BASE_URL}/api/participantes/${id}`, {
-                    method: 'DELETE'
-                });
-
-                if (!response.ok) {
-                    throw new Error('Falha ao remover participante.');
-                }
-
-                // Recarrega a lista para mostrar o resultado
+                const response = await fetch(`${API_BASE_URL}/api/participantes/${id}`, { method: 'DELETE' });
+                if (!response.ok) throw new Error('Falha ao remover participante.');
                 await carregarParticipantes();
-
-            } catch (error) {
-                console.error(error);
-                alert('Erro ao remover participante.');
-            }
+            } catch (error) { console.error(error); alert('Erro ao remover participante.'); }
         }
-
     </script>
-
 </body>
 </html>

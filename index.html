@@ -8,18 +8,38 @@
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f4f7f6;
             color: #333;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
+            
+            /* --- MUDANÇAS DA IMAGEM DE FUNDO --- */
+            
+            /* 1. Substitua 'background.jpg' pelo nome da sua imagem */
+            background-image: url('Fundo_01-02.jpg'); 
+            
+            /* 2. Garante que a imagem cubra a tela inteira */
+            background-size: cover; 
+            
+            /* 3. Centraliza a imagem */
+            background-position: center; 
+            
+            /* 4. (Opcional) Faz o fundo ficar fixo enquanto o conteúdo rola */
+            background-attachment: fixed; 
+            
+            /* --- FIM DAS MUDANÇAS --- */
         }
+        
         .container {
-            background-color: #ffffff;
+            /* * MUDANÇA: Adiciona um fundo branco semi-transparente 
+             * para que o texto fique legível em cima da foto.
+            */
+            background-color: rgba(255, 255, 255, 0.95); /* 95% opaco */
+            
             border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); /* Sombra um pouco mais forte */
             padding: 40px;
             text-align: center;
             width: 90%;
@@ -34,19 +54,27 @@
             color: #555;
             font-weight: 500;
         }
-        /* Onde o nome vai aparecer */
         #responsavel-nome {
             font-size: 2.5rem;
             font-weight: bold;
-            color: #007bff; /* Cor de destaque */
+            color: #007bff;
             margin-top: 20px;
-            margin-bottom: 20px;
-            padding: 20px;
+            padding: 20px 20px 10px 20px;
             background-color: #f0f8ff;
             border-radius: 8px;
-            min-height: 50px; /* Evita que o layout "pule" enquanto carrega */
+            min-height: 50px; 
         }
-        /* Mensagem de erro */
+        
+        #responsavel-telefone {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #333;
+            padding: 5px 20px 20px 20px;
+            background-color: #f0f8ff;
+            border-radius: 8px;
+            margin-top: -8px; 
+        }
+
         .erro {
             color: #d9534f;
             font-weight: bold;
@@ -62,46 +90,48 @@
         <div id="responsavel-nome">
             Carregando...
         </div>
+        
+        <div id="responsavel-telefone"></div>
     </div>
 
     <script>
-        // Esta função roda automaticamente assim que a página termina de carregar
+        // O JavaScript não precisa de nenhuma mudança
+        // (Vou usar a versão dinâmica que fizemos para o IP)
+        const API_BASE_URL = 'http://' + window.location.hostname + ':5000';
+
         window.addEventListener('load', () => {
             buscarResponsavelAtual();
         });
 
         async function buscarResponsavelAtual() {
-            // Este é o "alvo" que vamos preencher
             const nomeElemento = document.getElementById('responsavel-nome');
+            const telefoneElemento = document.getElementById('responsavel-telefone');
             
             try {
-                // 1. Fazer a requisição para o seu backend
-                // (O backend deve estar rodando no http://127.0.0.1:5000)
-                const response = await fetch('http://127.0.0.1:5000/api/sobreaviso-atual');
+                // MUDANÇA: Usando a variável dinâmica
+                const response = await fetch(`${API_BASE_URL}/api/sobreaviso-atual`);
 
-                // 2. Verificar se a resposta foi bem-sucedida (ex: 200 OK)
                 if (!response.ok) {
-                    // Se o backend der um erro (ex: 404, 500)
                     throw new Error(`Erro na API: ${response.statusText}`);
                 }
 
-                // 3. Converter a resposta de JSON para um objeto JavaScript
                 const dados = await response.json();
 
-                // 4. Verificar se temos um nome
                 if (dados && dados.nome) {
-                    // Sucesso! Coloca o nome na página
                     nomeElemento.textContent = dados.nome;
+                    if (dados.telefone) {
+                        telefoneElemento.textContent = dados.telefone;
+                    } else {
+                        telefoneElemento.textContent = "Telefone não cadastrado";
+                    }
                 } else {
-                    // Se o JSON veio sem o campo "nome"
                     nomeElemento.textContent = 'Nome não encontrado';
                     nomeElemento.classList.add('erro');
                 }
-
             } catch (error) {
-                // 5. Lidar com erros (ex: backend desligado, sem internet)
                 console.error('Falha ao buscar responsável:', error);
                 nomeElemento.textContent = 'Não foi possível conectar ao servidor.';
+                telefoneElemento.textContent = '';
                 nomeElemento.classList.add('erro');
             }
         }
