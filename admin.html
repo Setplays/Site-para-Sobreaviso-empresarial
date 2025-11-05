@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale-1.0">
+    <title>Admin - Controle de Sobreaviso</title>
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            padding-top: 40px;
+            padding-bottom: 40px;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 90%;
+            max-width: 700px;
+        }
+        h1, h2 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        a {
+            color: #007bff;
+            display: block;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Tabela */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f9f9f9;
+        }
+        tr:nth-child(even) {
+            background-color: #fdfdfd;
+        }
+        
+        /* Formulários */
+        form {
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            margin-top: 20px;
+        }
+        form div {
+            margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        form label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            width: 100px;
+        }
+        form input[type="text"],
+        form input[type="number"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            min-width: 150px;
+        }
+        
+        /* Botões */
+        button, .button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button.edit-btn {
+            background-color: #ffc107;
+        }
+        button.edit-btn:hover {
+            background-color: #e0a800;
+        }
+        button.delete-btn {
+            background-color: #d9534f;
+        }
+        button.delete-btn:hover {
+            background-color: #c9302c;
+        }
+        button.cancel-btn {
+            background-color: #777;
+        }
+        button.cancel-btn:hover {
+            background-color: #555;
+        }
+        
+        /* Seção de Edição (escondida por padrão) */
+        #edit-form-container {
+            display: none;
+            margin-top: 30px;
+            border-top: 2px dashed #007bff;
+            padding-top: 20px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Gerenciamento</h1>
+        <a href="index.html">Ver Sobreaviso Atual</a>
+
+        <section id="lista-section">
+            <h2>Participantes Atuais</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Ordem</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-participantes">
+                    <tr><td colspan="3">Carregando...</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="add-section">
+            <h2>Adicionar Novo Participante</h2>
+            <form id="add-form">
+                <div>
+                    <label for="novo-nome">Nome:</label>
+                    <input type="text" id="novo-nome" placeholder="Nome completo" required>
+                </div>
+                <div>
+                    <label for="nova-ordem">Ordem:</label>
+                    <input type="number" id="nova-ordem" placeholder="Ex: 1, 2, 3..." required>
+                </div>
+                <button type="submit">Adicionar Participante</button>
+            </form>
+        </section>
+        
+        <section id="edit-form-container">
+            <h2>Editar Participante</h2>
+            <form id="edit-form">
+                <input type="hidden" id="edit-id">
+                <div>
+                    <label for="edit-nome">Nome:</label>
+                    <input type="text" id="edit-nome" required>
+                </div>
+                <div>
+                    <label for="edit-ordem">Ordem:</label>
+                    <input type="number" id="edit-ordem" required>
+                </div>
+                <button type="submit">Salvar Alterações</button>
+                <button type="button" id="cancel-edit-btn" class="cancel-btn">Cancelar</button>
+            </form>
+        </section>
+
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://127.0.0.1:5000'; // O endereço do seu backend
+
+        // --- Event Listeners (Pontos de Partida) ---
+
+        // 1. Quando a página carregar, busca a lista de participantes
+        window.addEventListener('load', () => {
+            carregarParticipantes();
+        });
+
+        // 2. Quando o formulário de "Adicionar" for enviado
+        document.getElementById('add-form').addEventListener('submit', async (event) => {
+            event.preventDefault(); // Impede o recarregamento da página
+
+            const nome = document.getElementById('novo-nome').value;
+            const ordem = document.getElementById('nova-ordem').value;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/participantes`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nome: nome,
+                        ordem_rotacao: parseInt(ordem)
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Falha ao adicionar participante.');
+                }
+                
+                // Limpa o formulário e recarrega a lista
+                document.getElementById('novo-nome').value = '';
+                document.getElementById('nova-ordem').value = '';
+                await carregarParticipantes();
+
+            } catch (error) {
+                console.error(error);
+                alert('Erro ao adicionar participante.');
+            }
+        });
+
+        // 3. Quando o formulário de "Editar" for enviado
+        document.getElementById('edit-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            
+            const id = document.getElementById('edit-id').value;
+            const nome = document.getElementById('edit-nome').value;
+            const ordem = document.getElementById('edit-ordem').value;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/participantes/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nome: nome,
+                        ordem_rotacao: parseInt(ordem)
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Falha ao atualizar participante.');
+                }
+
+                // Esconde o formulário de edição e recarrega a lista
+                document.getElementById('edit-form-container').style.display = 'none';
+                await carregarParticipantes();
+
+            } catch (error) {
+                console.error(error);
+                alert('Erro ao atualizar participante.');
+            }
+        });
+
+        // 4. Quando o botão "Cancelar" da edição for clicado
+        document.getElementById('cancel-edit-btn').addEventListener('click', () => {
+            document.getElementById('edit-form-container').style.display = 'none';
+        });
+
+        
+        // --- Funções Auxiliares ---
+
+        /**
+         * Busca a lista de participantes da API e preenche a tabela.
+         */
+        async function carregarParticipantes() {
+            const tbody = document.getElementById('lista-participantes');
+            tbody.innerHTML = '<tr><td colspan="3">Carregando...</td></tr>'; // Limpa a lista antiga
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/participantes`);
+                if (!response.ok) {
+                    throw new Error('Não foi possível carregar a lista.');
+                }
+                
+                const participantes = await response.json();
+                
+                // Limpa o "Carregando..."
+                tbody.innerHTML = '';
+
+                if (participantes.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3">Nenhum participante cadastrado.</td></tr>';
+                    return;
+                }
+
+                // Cria uma linha <tr> para cada participante
+                participantes.forEach(p => {
+                    const tr = document.createElement('tr');
+                    
+                    // Coluna Nome
+                    const tdNome = document.createElement('td');
+                    tdNome.textContent = p.nome;
+                    
+                    // Coluna Ordem
+                    const tdOrdem = document.createElement('td');
+                    tdOrdem.textContent = p.ordem_rotacao;
+                    
+                    // Coluna Ações (Botões)
+                    const tdAcoes = document.createElement('td');
+                    
+                    // Botão Editar
+                    const editButton = document.createElement('button');
+                    editButton.textContent = 'Editar';
+                    editButton.className = 'edit-btn';
+                    editButton.onclick = () => mostrarFormularioEdicao(p.id, p.nome, p.ordem_rotacao);
+                    
+                    // Botão Deletar
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Remover';
+                    deleteButton.className = 'delete-btn';
+                    deleteButton.onclick = () => deletarParticipante(p.id);
+
+                    tdAcoes.appendChild(editButton);
+                    tdAcoes.appendChild(deleteButton);
+                    
+                    tr.appendChild(tdNome);
+                    tr.appendChild(tdOrdem);
+                    tr.appendChild(tdAcoes);
+                    
+                    tbody.appendChild(tr);
+                });
+
+            } catch (error) {
+                console.error(error);
+                tbody.innerHTML = `<tr><td colspan="3" class="erro">${error.message}</td></tr>`;
+            }
+        }
+
+        /**
+         * Mostra a seção de edição e preenche com os dados do participante.
+         */
+        function mostrarFormularioEdicao(id, nome, ordem) {
+            document.getElementById('edit-form-container').style.display = 'block';
+            
+            // Preenche os campos do formulário
+            document.getElementById('edit-id').value = id;
+            document.getElementById('edit-nome').value = nome;
+            document.getElementById('edit-ordem').value = ordem;
+            
+            // Rola a página até o formulário de edição
+            document.getElementById('edit-form-container').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        /**
+         * Deleta um participante pelo ID.
+         */
+        async function deletarParticipante(id) {
+            // Pede confirmação
+            if (!confirm('Tem certeza que deseja remover este participante? \nEsta ação não pode ser desfeita.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/participantes/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Falha ao remover participante.');
+                }
+
+                // Recarrega a lista para mostrar o resultado
+                await carregarParticipantes();
+
+            } catch (error) {
+                console.error(error);
+                alert('Erro ao remover participante.');
+            }
+        }
+
+    </script>
+
+</body>
+</html>
